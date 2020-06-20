@@ -51,7 +51,8 @@
 						price:'700',
 						category_slug:'hardware'
 					}
-                ]
+                ],
+                permission_stat:''
 			}
 		},
 		mounted(){
