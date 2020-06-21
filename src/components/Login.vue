@@ -48,6 +48,14 @@
 				var error = 0;
                 that.errors.username = "";
                 that.errors.password = "";
+                if(that.user.username!="admin"){
+                    that.errors.username = "Username does not match";
+					error = error+1;
+                }
+                if(that.user.password!="password"){
+                    that.errors.password = "Password does not match";
+					error = error+1;
+                }
                 if(that.user.username==""){
                     that.errors.username = "Username is required";
 					error = error+1;

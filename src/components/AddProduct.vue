@@ -10,7 +10,7 @@
 					<div class="card-body">
 						<div class="login-form">
                         <div class="row">
-                        <div class="col-md-6 form-group">
+                        <!-- <div class="col-md-6 form-group">
                             <label class="control-label">Product ID <font color="red">*</font></label>
                             <input
                                 class="form-control"
@@ -23,7 +23,7 @@
                                 style="margin-bottom:5px"
                             >
                             <span class="text text-red">{{errors.product_id}}</span>
-                        </div>
+                        </div> -->
                         <div class="col-md-6 form-group">
                             <label class="control-label">Product Name <font color="red">*</font></label>
                             <input
@@ -38,8 +38,6 @@
                             >
                             <span class="text text-red">{{errors.product_name}}</span>
                         </div>
-                        </div>
-                        <div class="row">
                         <div class="col-md-6 form-group">
                             <label class="control-label">Price ($) <font color="red">*</font></label>
                             <input
@@ -48,20 +46,29 @@
                                 placeholder="Product Price"
                                 v-model="product.price"
                                 name="price"
-                                v-on:keydown.13="focusOnEnter('#category')"
+                                v-on:keydown.13="focusOnEnter('#description')"
                                 style="margin-bottom:5px"
                             >
                             <span class="text text-red">{{errors.price}}</span>
                         </div>
+                        </div>
+                        <div class="row">
                         <div class="col-md-6 form-group">
-                            <label class="control-label">Category <font color="red">*</font></label>
-                            <select v-model="product.category" name="category" class="form-control input-sm" id="category">
-								<option value="" selected="selected">Select Category</option>
-                                <option v-for="option in category" v-bind:value="option.id" :key="option.id" >
-                                    {{ option.name }}
-                                </option>
-                            </select>
-                            <span class="text text-red">{{errors.category}}</span>
+                            <label class="control-label">Description <font color="red">*</font></label>
+                            <textarea
+                                class="form-control"
+                                id="description"
+                                placeholder="Product description"
+                                v-model="product.description"
+                                name="description"
+                                style="margin-bottom:5px"
+                            ></textarea>
+                            <span class="text text-red">{{errors.description}}</span>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="control-label">Image <font color="red">*</font></label>
+                            <input type="file" id="file" name="product_image" accept="image/*" @change="onFileChange" />
+                            <span class="text text-red">{{errors.image}}</span>
                         </div>
                     </div>
                         
@@ -83,21 +90,17 @@
 		data(){
 			return{
 				product:{
-					id:'',
 					name:'',
 					price:'',
-					category_slug:''
+					description:'',
+                    image:''
 				},
 				errors:{
-					id:"",
 					name: "",
 					price: "",
-					category_slug: "",
+					description: "",
+                    image:''
 				},
-				category : [
-					{id: '1', name: 'clothing'},
-					{id: '2', name: 'hardware'}
-				],
 				permission_stat: ''
 			}
 		},
@@ -129,30 +132,29 @@
             },
             clear(){
 				this.product = {
-					id: '',
 					name: '',
 					price: '',
-					category_slug: ''
+					description: '',
+                    image:''
 				};
 				this.errors = {
-					id: '',
 					name: '',
 					price: '',
-					category_slug: ''
+					description: '',
+                    image:''
 				};
+            },
+            onFileChange(e) {
+                const file = e.target.files[0];
+                this.product.image =  URL.createObjectURL(file);
             },
             saveDetails(){
                 let that = this;
                 var error = 0;
-                that.errors.id = "";
                 that.errors.name = "";
                 that.errors.price = "";
-                that.errors.category_slug = "";
+                that.errors.description = "";
 
-                if(that.product.id==""){
-                    that.errors.product_id = "Product ID is required";
-					error = error+1;
-                } 
                 if(that.product.name==""){
                     that.errors.product_name = "Product Name is required";
 					error = error+1;
@@ -161,22 +163,23 @@
                     that.errors.price = "Price is required";
                     error = error+1;
                 }
-                if(that.product.category_slug==""){
-                    that.errors.category = "Category is required";
+                if(that.product.description==""){
+                    that.errors.description = "Product Description is required";
+                    error = error+1;
+                }
+                if(that.product.image==""){
+                    that.errors.image = "Product Image is required";
                     error = error+1;
                 }
                 if(error<=0){
-					that.axios.post('/api/save_product',{
-						product:that.product
+					that.axios.post('http://localhost:8081/items.php',{
+						name:that.product.name, price:that.product.price, description:that.product.description, image:that.product.image
 					}).then((response)=>{
-						if(response.data.status==200){
+						console.log(response);
 							that.clear();
 							that.errors = '';
-							Swal.fire("Successfully saved!", {
-								icon: "success",
-							});
+							Swal.fire('Success',response.data.message,'success');
 							that.$router.push('/list_product');
-						}
 					});
 				}
 			}

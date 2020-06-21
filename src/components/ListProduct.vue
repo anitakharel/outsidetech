@@ -2,7 +2,7 @@
 	<div v-show="permission_stat==1" class="list-product">
 		<div class="container">
 			<div class="row">
-				<div class="col-md-6 offset-md-3">
+				<div class="col-md-8 offset-md-2">
 				<div class="card">
 					<div class="card-header">
 						<h3>Product List</h3>
@@ -15,7 +15,8 @@
 								<th>Product ID</th>
 								<th>Name</th>
 								<th>Price ($)</th>
-								<th>Category</th>
+								<th>Description</th>
+								<th>Image</th>
 							</thead>
 							<tbody>
 								<tr v-for="(product,index) in products" :key="index">
@@ -23,7 +24,8 @@
 									<td>{{ product.id }}</td>
 									<td>{{ product.name }}</td>
 									<td>{{ product.price }}</td>
-									<td>{{ product.category_slug }}</td>
+									<td>{{ product.description }}</td>
+									<td><img v-bind:src="getImgUrl(product.image)" width="50" alt=""></td>
 								</tr>
 							</tbody>
 						</table>
@@ -38,20 +40,7 @@
 	export default{
 		data(){
 			return{
-				products:[
-                    {
-						id:'OT01',
-						name:'Tshirt',
-						price:'50',
-						category_slug:'clothing'
-					},
-					{
-						id:'OT02',
-						name:'Monitor',
-						price:'700',
-						category_slug:'hardware'
-					}
-                ],
+				products:[],
                 permission_stat:''
 			}
 		},
@@ -66,15 +55,17 @@
 			}else{
 				window.location.href = "/";
 			}
+			this.fetchProducts();
 		},
 		methods:{
-			saveDetails(){
+			fetchProducts(){
                 let that = this;
-				that.axios.get('/api/fetch_product').then((response)=>{
-					if(response.data.status==200){
-						that.products = response.data.products;
-					}
+				that.axios.get('http://localhost:8081/items.php').then((response)=>{
+					that.products = response.data;
 				});
+			},
+			getImgUrl(pic) {
+				return require('../assets/'+pic);
 			}
 		}
 	}

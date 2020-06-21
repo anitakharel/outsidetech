@@ -11,6 +11,7 @@
 							<tr>
 								<th>Item</th>
 								<th>Qty</th>
+								<th class="txtright">Price($)</th>
 								<th class="txtright">Total($)</th>
 							</tr>
 						</thead>
@@ -18,10 +19,11 @@
 							<tr>
 								<td>{{details.name}}</td>
 								<td>{{details.quantity}}</td>
+								<td class="txtright">{{details.price}}</td>
 								<td class="txtright">{{details.total_amount}}</td>
 							</tr>
 							<tr class="total">
-								<td colspan="2">Total Amount</td>
+								<td colspan="3">Total Amount</td>
 								<td class="txtright">{{ details.total_amount }}</td>
 							</tr>
 						</tbody>
@@ -50,23 +52,32 @@
 	export default{
 		data(){
 			return{
-				details:{
-					id: 'OT01',
-					name: 'Tshirt',
-					quantity: '1',
-					price: '50',
-					total_amount: '50'
+				details:{},
+				order_details:{
+					item_id:'',
+					quantity:'',
+					payment_id:'',
+					payment_type:''
 				}
 			}
+		},
+		mounted(){
+			this.details = JSON.parse(localStorage.getItem('product'));
+			this.order_details.item_id = this.details.id;
+			this.order_details.quantity = this.details.quantity;
 		},
 		methods:{
 			save(id){
 				let that = this;
+				var payment_id = id;
 				var name = '';
+				var payment_type = '';
 				if(id==1){
 					name = "Cash on Delivery";
+					payment_type = "cash";
 				}else if(id==2){
-					name = "Stripe";
+					name = "stripe";
+					payment_type = "stripe";
 				}
 				Swal.fire({
 					title: 'Are you sure to buy with '+name+'?',
@@ -76,11 +87,16 @@
 					cancelButtonText: 'No'
 				}).then((result) => {
 					if (result.value) {
-						Swal.fire(
-							'Success!',
-							'User selected '+that.details.name+' and paid $'+that.details.price+' with '+name,
-							'success'
-						)
+						that.axios.post('http://localhost:8081/orders.php',{
+							item_id:that.details.id, quantity:that.details.quantity, payment_id:payment_id, payment_type:payment_type, name:that.details.name, total:that.details.total_amount
+						}).then((response)=>{
+							console.log(response);
+								localStorage.removeItem('product');
+								Swal.fire('Success!',response.data.message,'success')
+								setTimeout(function () {
+									window.location.href = "/";
+								}, 1000); 
+						});
 
 					}
 				})
@@ -106,8 +122,11 @@
 }
 .paybody img{
     width: auto!important;
-    max-height: 40px;
+    max-height: 50px;
     border: 1px solid #ddd;
-    margin: 0 5px 5px 0;
+    margin: 0 10px 5px 0;
+    padding: 5px 15px;
+    -webkit-box-shadow: 1px 2px 5px -2px #807D7D;
+	box-shadow: 1px 2px 5px -2px #807D7D;
 }
 </style>
